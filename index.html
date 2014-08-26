@@ -38,6 +38,17 @@ function process(what) {
   } 
 }
 
+function floatTo256(f) {
+  if(f.length) {
+    var r = [];
+    for(var i = 0; i < f.length; i++) {
+      r.push(floatTo256(f[i]));
+    }
+    return r;
+  }
+  return f * 256;
+}
+
 var Convert = {
   // from https://gist.github.com/jonathantneal/2121882
   hsv2hsl: function(h, s, v) {
@@ -64,8 +75,15 @@ var Convert = {
     var rgb = Convert.hsl2rgb(h, s, l);
     return Convert.rgb2hsv.apply(this, rgb);
   },
+  rgb2hex: function(r, g, b) {
+    return '#' + hex(r) + hex(g) + hex(b);
+  },
 
   hsl2rgb: function(h, s, l) {
+    h = unit(h);
+    s = unit(s);
+    l = unit(l);
+
     if (s == 0) {
       return [l, l, l];
     }
@@ -86,10 +104,7 @@ var Convert = {
       rgb[i] = rgb[i] < 1 / 6 ? temp1 + (temp2 - temp1) * 6 * rgb[i] : rgb[i] < 1 / 2 ? temp2 : rgb[i] < 2 / 3 ? temp1 + (temp2 - temp1) * 6 * (2 / 3 - rgb[i]) : temp1;
     }
      
-    return rgb;
-  },
-  rgb2hex: function(r, g, b) {
-    return '#' + hex(r) + hex(g) + hex(b);
+    return floatTo256(rgb);
   },
   // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
   hex2rgb: function(hex) {
@@ -102,6 +117,11 @@ var Convert = {
   },
   // from https://github.com/kristopolous/skype-search/blob/master/js/ui.js
   hsv2rgb: function(h, s, v) {
+    var ret;
+    h = unit(h);
+    s = unit(s);
+    v = unit(v);
+
     h = (h % 1 + 1) % 1; // wrap hue
 
     var i = Math.floor(h * 6),
@@ -111,32 +131,35 @@ var Convert = {
         t = v * (1 - s * (1 - f));
 
     switch (i) {
-      case 0: return [v, t, p];
-      case 1: return [q, v, p];
-      case 2: return [p, v, t];
-      case 3: return [p, q, v];
-      case 4: return [t, p, v];
-      case 5: return [v, p, q];
+      case 0: ret = [v, t, p]; break;
+      case 1: ret = [q, v, p]; break;
+      case 2: ret = [p, v, t]; break;
+      case 3: ret = [p, q, v]; break;
+      case 4: ret = [t, p, v]; break;
+      case 5: ret = [v, p, q]; break;
     }
+    return floatTo256(ret);
   },
 
   rgb2hsl: function(r, g, b) {
     r = unit(r);
     g = unit(g);
     b = unit(b);
+
     var
       min = Math.min(r, g, b),
       max = Math.max(r, g, b),
       diff = max - min,
       h = 0, s = 0, l = (min + max) / 2;
        
-      if (diff != 0) {
-        s = l < 0.5 ? diff / (max + min) : diff / (2 - max - min);
-         
-        h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60;
-      }
+    if (diff != 0) {
+      s = l < 0.5 ? diff / (max + min) : diff / (2 - max - min);
        
-      return [h, s, l];
+      h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60;
+    }
+     
+    return [h, s, l];
+    return floatTo256([h, s, l]);
   }
 };
 
