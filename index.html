@@ -1,5 +1,19 @@
 <form action=javascript:doit()>
-<input id="input">
+<input id='input' name='input' list='funcnames'>
+<datalist id='funcnames'>
+  <option value="rgb2hex r g b">
+  <option value="rgb2hsl r g b">
+  <option value="rgb2hsv r g b">
+  <option value="hsl2hex h s l">
+  <option value="hsl2rgb h s l">
+  <option value="hsl2hsv h s l">
+  <option value="hex2rgb #rrggbb">
+  <option value="hex2hsl #rrggbb">
+  <option value="hex2hsv #rrggbb">
+  <option value="hsv2hex h s v">
+  <option value="hsv2rgb h s v">
+  <option value="hsv2hsl h s v">
+</datalist>
 <button>do it</button>
 </form>
 <pre id="output"></pre>
@@ -11,7 +25,46 @@ function unit(what) {
   return what;
 }
 
+// from http://stackoverflow.com/questions/1740700/how-to-get-hex-color-value-rather-than-rgb-value
+function hex(x) {
+  return isNaN(x) ? "00" : hexDigits[(x - x % 16) / 16] + hexDigits[x % 16];
+}
+
+function process(what) {
+  if(what.substr) {
+    return what;
+  } else {
+    return what.join(' ');
+  } 
+}
+
 var Convert = {
+  // from https://gist.github.com/jonathantneal/2121882
+  hsv2hsl: function(h, s, v) {
+    var rgb = Convert.hsv2rgb(h, s, v);
+    return Convert.rgb2hsl.apply(this, rgb);
+  },
+  hex2hsv: function(hex) {
+    var rgb = Convert.hex2rgb(hex);
+    return Convert.rgb2hsv.apply(this, rgb);
+  },
+  hex2hsl: function(hex) {
+    var rgb = Convert.hex2rgb(hex);
+    return Convert.rgb2hsl.apply(this, rgb);
+  },
+  hsv2hex: function(h, s, v) {
+    var rgb = Convert.hsv2rgb(h, s, v);
+    return Convert.rgb2hex.apply(this, rgb);
+  },
+  hsl2hex: function(h, s, l) {
+    var rgb = Convert.hsl2rgb(h, s, v);
+    return Convert.rgb2hex.apply(this, rgb);
+  },
+  hsl2hsv: function(h, s, l) {
+    var rgb = Convert.hsl2rgb(h, s, l);
+    return Convert.rgb2hsv.apply(this, rgb);
+  },
+
   hsl2rgb: function(h, s, l) {
     if (s == 0) {
       return [l, l, l];
@@ -33,8 +86,12 @@ var Convert = {
       rgb[i] = rgb[i] < 1 / 6 ? temp1 + (temp2 - temp1) * 6 * rgb[i] : rgb[i] < 1 / 2 ? temp2 : rgb[i] < 2 / 3 ? temp1 + (temp2 - temp1) * 6 * (2 / 3 - rgb[i]) : temp1;
     }
      
-    return rgb.join(' ');
+    return rgb;
   },
+  rgb2hex: function(r, g, b) {
+    return '#' + hex(r) + hex(g) + hex(b);
+  },
+  // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
   hex2rgb: function(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? [
@@ -43,6 +100,26 @@ var Convert = {
         parseInt(result[3], 16)
     ] : null;
   },
+  // from https://github.com/kristopolous/skype-search/blob/master/js/ui.js
+  hsv2rgb: function(h, s, v) {
+    h = (h % 1 + 1) % 1; // wrap hue
+
+    var i = Math.floor(h * 6),
+        f = h * 6 - i,
+        p = v * (1 - s),
+        q = v * (1 - s * f),
+        t = v * (1 - s * (1 - f));
+
+    switch (i) {
+      case 0: return [v, t, p];
+      case 1: return [q, v, p];
+      case 2: return [p, v, t];
+      case 3: return [p, q, v];
+      case 4: return [t, p, v];
+      case 5: return [v, p, q];
+    }
+  },
+
   rgb2hsl: function(r, g, b) {
     r = unit(r);
     g = unit(g);
@@ -59,7 +136,7 @@ var Convert = {
         h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60;
       }
        
-      return [h, s, l].join(' ');
+      return [h, s, l];
   }
 };
 
@@ -82,7 +159,7 @@ function doit() {
         parts[i] = parseFloat(parts[i]);
       }
     }
-    output.innerHTML = func.apply(this, parts);
+    output.innerHTML = process(func.apply(this, parts));
   } else {
     output.innerHTML = parts.shift() + " not found";
   }
