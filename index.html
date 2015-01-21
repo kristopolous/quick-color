@@ -54,11 +54,15 @@ function hex(x) {
 }
 
 function process(what) {
-  if(what.substr) {
-    return what;
+  if(what) {
+    if(what.substr) {
+      return what;
+    } else {
+      return what.join(' ');
+    } 
   } else {
-    return what.join(' ');
-  } 
+    return what;
+  }
 }
 
 function floatTo256(f) {
@@ -158,6 +162,18 @@ var Convert = {
   // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
   hex2rgb: function(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    if (!result) {
+      // this is the #RGB format
+      result = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(hex);
+      // we just expand it, that's what it means.
+      if(result) {
+        result[1] += result[1];
+        result[2] += result[2];
+        result[3] += result[3];
+      }
+    }
+
     return result ? [
         parseInt(result[1], 16),
         parseInt(result[2], 16),
@@ -220,7 +236,11 @@ function pop(el) {
   document.getElementById('input').value = el.innerHTML;
 }
 function append(el) {
-  document.getElementById('input').value += el.innerHTML;
+  var val = document.getElementById('input').value;
+  if(val.length > 6) {
+    document.getElementById('input').value = 
+      val.substr(0,7) + ' ' + el.innerHTML;
+  }
   doit();
 }
 
@@ -236,8 +256,11 @@ function doit() {
 
   if(Convert[first7]) {
     func = Convert[first7]; 
+    if(parts[0] == '') {
+      parts.shift();
+    }
     // if the input is a hex code and that's not what we are looking for
-    if(parts.length == 1 && func.length > 1){
+    if(parts.length == 1 && func.length > 1) {
       // convert it
       parts = Convert.hex2rgb(parts[0]);
     }
@@ -247,19 +270,26 @@ function doit() {
         parts[i] = parseFloat(parts[i]);
       }
     }
-    console.log('parts', parts);
-
-    color = process(func.apply(this, parts));
-
-    box = '';
-    if(color[0] == '#') {
-      box = '<span class=box style=background-color:' + color + '></span>';
+    if(parts.length == 0) {
+      res = first7 + " needs an argument";
     } else {
-      box = '<span class=box style=background-color:rgb(' + color.replace(/ /g, ',') + ')></span>';
-    }
 
-    res = "<a onclick=pop(this)>" + value + "</a><br/>" + 
-      box + "<a onclick=append(this)>" + color + "</a>";
+      color = process(func.apply(this, parts));
+      if(!color) {
+        res = first7 + " was invoked incorrectly.";
+      } else {
+
+        box = '';
+        if(color[0] == '#') {
+          box = '<span class=box style=background-color:' + color + '></span>';
+        } else {
+          box = '<span class=box style=background-color:rgb(' + color.replace(/ /g, ',') + ')></span>';
+        }
+
+        res = "<a onclick=pop(this)>" + value + "</a><br/>" + 
+          box + "<a onclick=append(this)>" + color + "</a>";
+      }
+    }
 
 //    document.getElementById('input').value = '';
   } else {
