@@ -18,6 +18,12 @@
 </form>
 <pre id="output"></pre>
 <script>
+function ununit(what) {
+  if(what > 1) {
+    return what;
+  }
+  return what * 256;
+}
 function unit(what) {
   if(what > 1) {
     return what / 256;
@@ -26,7 +32,9 @@ function unit(what) {
 }
 
 // from http://stackoverflow.com/questions/1740700/how-to-get-hex-color-value-rather-than-rgb-value
+var hexDigits = [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]
 function hex(x) {
+  x = parseInt(x);
   return isNaN(x) ? "00" : hexDigits[(x - x % 16) / 16] + hexDigits[x % 16];
 }
 
@@ -68,7 +76,7 @@ var Convert = {
     return Convert.rgb2hex.apply(this, rgb);
   },
   hsl2hex: function(h, s, l) {
-    var rgb = Convert.hsl2rgb(h, s, v);
+    var rgb = Convert.hsl2rgb(h, s, l);
     return Convert.rgb2hex.apply(this, rgb);
   },
   hsl2hsv: function(h, s, l) {
@@ -76,7 +84,7 @@ var Convert = {
     return Convert.rgb2hsv.apply(this, rgb);
   },
   rgb2hex: function(r, g, b) {
-    return '#' + hex(r) + hex(g) + hex(b);
+    return '#' + hex(ununit(r)) + hex(ununit(g)) + hex(ununit(b));
   },
 
   hsl2rgb: function(h, s, l) {
@@ -182,7 +190,8 @@ function doit() {
         parts[i] = parseFloat(parts[i]);
       }
     }
-    output.innerHTML = process(func.apply(this, parts));
+    console.log(parts);
+    output.innerHTML = '<div>' + value + "<br/>" + process(func.apply(this, parts)) + '</div>' + output.innerHTML;
   } else {
     output.innerHTML = parts.shift() + " not found";
   }
