@@ -1,3 +1,18 @@
+<style>
+.box {
+  display: inline-block;
+  width: 12px;
+  vertical-align: middle;
+  margin-right: 0.2em;
+  height: 1em;
+}
+a{ cursor: pointer; text-decoration: underline; color: blue}
+#input { width: 80% }
+div {
+  margin-top: 0.1em;
+}
+button { float: right }
+</style>
 <form action=javascript:doit()>
 <input id='input' name='input' list='funcnames'>
 <datalist id='funcnames'>
@@ -87,6 +102,32 @@ var Convert = {
     return '#' + hex(ununit(r)) + hex(ununit(g)) + hex(ununit(b));
   },
 
+  // from http://www.javascripter.net/faq/rgb2hsv.htm
+  rgb2hsv: function(r, g, b) {
+    var h, s, v;
+    
+    r = unit(r);
+    g = unit(g);
+    b = unit(b);
+
+    var minRGB = Math.min(r, Math.min(g, b));
+    var maxRGB = Math.max(r, Math.max(g, b));
+
+    // Black-gray-white
+    if (minRGB == maxRGB) {
+      v = minRGB;
+      return [0, 0, v];
+    }
+
+    // Colors other than black-gray-white:
+    var d = (r == minRGB) ? g - b : ((b == minRGB) ? r - g : b - r);
+    var h = (r == minRGB) ? 3 : ((b == minRGB) ? 1 : 5);
+    h = 60 * (h - d / (maxRGB - minRGB));
+    s = (maxRGB - minRGB) / maxRGB;
+    v = maxRGB;
+    return [h, s, v];
+  },
+
   hsl2rgb: function(h, s, l) {
     h = unit(h);
     s = unit(s);
@@ -123,10 +164,11 @@ var Convert = {
         parseInt(result[3], 16)
     ] : null;
   },
+
   // from https://github.com/kristopolous/skype-search/blob/master/js/ui.js
   hsv2rgb: function(h, s, v) {
     var ret;
-    h = unit(h);
+    //h = unit(h);
     s = unit(s);
     v = unit(v);
 
@@ -138,6 +180,7 @@ var Convert = {
         q = v * (1 - s * f),
         t = v * (1 - s * (1 - f));
 
+    console.log(i);
     switch (i) {
       case 0: ret = [v, t, p]; break;
       case 1: ret = [q, v, p]; break;
@@ -154,6 +197,8 @@ var Convert = {
     g = unit(g);
     b = unit(b);
 
+    console.log(r, g, b);
+    return [r, g, b];
     var
       min = Math.min(r, g, b),
       max = Math.max(r, g, b),
@@ -171,14 +216,26 @@ var Convert = {
   }
 };
 
+function pop(el) {
+  document.getElementById('input').value = el.innerHTML;
+}
+function append(el) {
+  document.getElementById('input').value += el.innerHTML;
+  doit();
+}
+
 function doit() {
   var value = document.getElementById('input').value,
+    res,
+    color,
+    box,
     output = document.getElementById('output'),
     func,
-    parts = value.split(' ');
+    first7 = value.substr(0, 7),
+    parts = value.substr(7).replace(/^\s+/, '').split(' ');
 
-  if(Convert[parts[0]]) {
-    func = Convert[parts.shift()]; 
+  if(Convert[first7]) {
+    func = Convert[first7]; 
     // if the input is a hex code and that's not what we are looking for
     if(parts.length == 1 && func.length > 1){
       // convert it
@@ -190,10 +247,24 @@ function doit() {
         parts[i] = parseFloat(parts[i]);
       }
     }
-    console.log(parts);
-    output.innerHTML = '<div>' + value + "<br/>" + process(func.apply(this, parts)) + '</div>' + output.innerHTML;
+    console.log('parts', parts);
+
+    color = process(func.apply(this, parts));
+
+    box = '';
+    if(color[0] == '#') {
+      box = '<span class=box style=background-color:' + color + '></span>';
+    } else {
+      box = '<span class=box style=background-color:rgb(' + color.replace(/ /g, ',') + ')></span>';
+    }
+
+    res = "<a onclick=pop(this)>" + value + "</a><br/>" + 
+      box + "<a onclick=append(this)>" + color + "</a>";
+
+//    document.getElementById('input').value = '';
   } else {
-    output.innerHTML = parts.shift() + " not found";
+    res = first7 + " not found";
   }
+  output.innerHTML = '<div>' + res + '</div>' + output.innerHTML;
 }
 </script>
