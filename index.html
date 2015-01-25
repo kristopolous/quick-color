@@ -58,6 +58,9 @@ function process(what) {
     if(what.substr) {
       return what;
     } else {
+      for(var i = 0; i < what.length; i++) {
+        what[i] = what[i].toFixed(3);
+      }
       return what.join(' ');
     } 
   } else {
@@ -181,33 +184,41 @@ var Convert = {
     ] : null;
   },
 
-  // from https://github.com/kristopolous/skype-search/blob/master/js/ui.js
-  hsv2rgb: function(h, s, v) {
-    var ret;
-    //h = unit(h);
-    s = unit(s);
-    v = unit(v);
-
-    h = (h % 1 + 1) % 1; // wrap hue
-
-    var i = Math.floor(h * 6),
-        f = h * 6 - i,
-        p = v * (1 - s),
-        q = v * (1 - s * f),
-        t = v * (1 - s * (1 - f));
-
-    console.log(i);
-    switch (i) {
-      case 0: ret = [v, t, p]; break;
-      case 1: ret = [q, v, p]; break;
-      case 2: ret = [p, v, t]; break;
-      case 3: ret = [p, q, v]; break;
-      case 4: ret = [t, p, v]; break;
-      case 5: ret = [v, p, q]; break;
-    }
-    return floatTo256(ret);
+  // from https://gist.github.com/schinckel/1588489
+  hsv2rgb: function (h, s, v) {
+    var rgb, data, i;
+    if (s === 0) {
+      rgb = [v,v,v];
+    } else {
+      h = h / 60;
+      i = Math.floor(h);
+      data = [v*(1-s), v*(1-s*(h-i)), v*(1-s*(1-(h-i)))];
+      switch(i) {
+        case 0:
+          rgb = [v, data[2], data[0]];
+          break;
+        case 1:
+          rgb = [data[1], v, data[0]];
+          break;
+        case 2:
+          rgb = [data[0], v, data[2]];
+          break;
+        case 3:
+          rgb = [data[0], data[1], v];
+          break;
+        case 4:
+          rgb = [data[2], data[0], v];
+          break;
+        default:
+          rgb = [v, data[0], data[1]];
+          break;
+      }
+    } 
+    rgb[0] *= 255;
+    rgb[1] *= 255;
+    rgb[2] *= 255;
+    return rgb;
   },
-
   rgb2hsl: function(r, g, b) {
     r = unit(r);
     g = unit(g);
