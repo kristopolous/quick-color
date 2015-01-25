@@ -47,15 +47,22 @@ function onload() {
     document.getElementById('output').innerHTML = localStorage['output'];
   }
 }
-function ununit(what) {
+function ununit(what, max) {
+  if(!max) {
+    max = 256;
+  }
   if(what > 1) {
     return what;
   }
-  return what * 256;
+  return what * max;
 }
-function unit(what) {
+
+function unit(what, max) {
+  if(!max) {
+    max = 256;
+  }
   if(what > 1) {
-    return what / 256;
+    return what / max;
   }
   return what;
 }
@@ -151,34 +158,33 @@ var Convert = {
     v = maxRGB;
     return [h, s, v];
   },
-
+  
+  // from http://stackoverflow.com/a/9493060/535759
   hsl2rgb: function(h, s, l) {
-    h = unit(h);
+    h = unit(h, 360);
     s = unit(s);
     l = unit(l);
-
     if (s == 0) {
       return floatTo256([l, l, l]);
     }
-     
-    var temp2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    var temp1 = 2 * l - temp2;
-     
-    h /= 360;
-     
-    var
-      rtemp = (h + 1 / 3) % 1,
-      gtemp = h,
-      btemp = (h + 2 / 3) % 1,
-      rgb = [rtemp, gtemp, btemp],
-      i = 0;
-     
-    for (; i < 3; ++i) {
-      rgb[i] = rgb[i] < 1 / 6 ? temp1 + (temp2 - temp1) * 6 * rgb[i] : rgb[i] < 1 / 2 ? temp2 : rgb[i] < 2 / 3 ? temp1 + (temp2 - temp1) * 6 * (2 / 3 - rgb[i]) : temp1;
+    var hue2rgb = function hue2rgb(p, q, t){
+        if(t < 0) t += 1;
+        if(t > 1) t -= 1;
+        if(t < 1/6) return p + (q - p) * 6 * t;
+        if(t < 1/2) return q;
+        if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
     }
-     
-    return floatTo256(rgb);
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+
+    return floatTo256([r,g,b]);
   },
+
   // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
   hex2rgb: function(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -239,6 +245,7 @@ var Convert = {
     g = unit(g);
     b = unit(b);
 
+    // this part from https://gist.github.com/jonathantneal/2121882
     var
       min = Math.min(r, g, b),
       max = Math.max(r, g, b),
@@ -246,13 +253,31 @@ var Convert = {
       h = 0, s = 0, l = (min + max) / 2;
        
     if (diff != 0) {
-      s = l < 0.5 ? diff / (max + min) : diff / (2 - max - min);
-       
-      h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60;
+      s = l < 0.5 ? 
+        diff / (max + min) : 
+        diff / (2 - max - min);
+
+      // this part from http://rgb2hsl.nichabi.com/javascript-function.php 
+      switch (max) {
+        case r:
+          h = (g - b) / diff + (g < b ? 6 : 0);
+          break;
+
+        case g:
+          h = (b - r) / diff + 2;
+          break;
+
+        case b:
+          h = (r - g) / diff + 4;
+          break;
+        }
+      h /= 6;
+      //h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60;
     }
      
-    return [h, s, l];
-    return floatTo256([h, s, l]);
+    // [0 - 360, 0 - 1, 0 - 1]
+    return [h * 360, s, l];
+    //return floatTo256([h, s, l]);
   }
 };
 
