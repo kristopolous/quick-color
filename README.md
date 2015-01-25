@@ -6,7 +6,7 @@ Some of them even moronically post data off to a server and do a page refresh to
 
 We can do better.
 
-## Here's my attempt
+## A clean open-source hacker-friendly color converter.
 
 <img src=http://i.imgur.com/PwYJ2ys.png>
 <br>
