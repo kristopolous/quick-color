@@ -1,3 +1,4 @@
+<!doctype html>
 <style>
 .box {
   display: inline-block;
@@ -13,6 +14,7 @@ div {
 }
 button { float: right }
 </style>
+<body onload=onload()>
 <form action=javascript:doit()>
 <input id='input' name='input' list='funcnames'>
 <datalist id='funcnames'>
@@ -32,7 +34,13 @@ button { float: right }
 <button>do it</button>
 </form>
 <pre id="output"></pre>
+</body>
 <script>
+function onload() {
+  if(localStorage['output']) {
+    document.getElementById('output').innerHTML = localStorage['output'];
+  }
+}
 function ununit(what) {
   if(what > 1) {
     return what;
@@ -306,6 +314,8 @@ function doit() {
   } else {
     res = first7 + " not found";
   }
-  output.innerHTML = '<div>' + res + '</div>' + output.innerHTML;
+  output.innerHTML = ('<div>' + res + '</div>' + output.innerHTML).substr(0, 3000);
+
+  localStorage['output'] = output.innerHTML;
 }
 </script>
