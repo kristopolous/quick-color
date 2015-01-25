@@ -510,55 +510,65 @@ function doit() {
     first7 = value.substr(0, 7),
     parts = value.substr(7).replace(/^\s+/, '').split(' ');
 
-  if(Convert[first7]) {
-    func = Convert[first7]; 
+outer:
+  do {
+    if(Convert[first7]) {
+      func = Convert[first7]; 
 
-    LHS = first7.substr(0, 3);
-    RHS = first7.substr(4);
+      LHS = first7.substr(0, 3);
+      RHS = first7.substr(4);
 
-    if(parts[0] == '') {
-      parts.shift();
-    }
-    // if the input is a hex code and that's not what we are looking for
-    if(parts.length == 1 && func.length > 1) {
-      // convert it
-      parts = Convert.hex2rgb(parts[0]);
-    }
+      if(parts[0] == '') {
+        parts.shift();
+      }
+      // if the input is a hex code and that's not what we are looking for
+      if(parts.length == 1 && func.length > 1) {
+        // convert it
+        parts = Convert.hex2rgb(parts[0]);
+      }
 
-    // this means that our input should be integers
-    if(func.length > 1) {
-      for(var i = 0; i < parts.length; i++) {
-        // or perhaps expressions.
-        if(parts[i].match(/[\-+\*\/]/)) {
-          parts[i] = eval(parts[i]);
-        } else {
-          parts[i] = parseFloat(parts[i]);
+      // this means that our input should be integers
+      if(func.length > 1) {
+        for(var i = 0; i < parts.length; i++) {
+          // or perhaps expressions.
+          if(parts[i].match(/[\-+\*\/]/)) {
+            parts[i] = eval(parts[i]);
+          } else {
+            parts[i] = parseFloat(parts[i]);
+          }
         }
       }
-    }
+      for(var i = 0; i < parts.length; i++) {
+        if (parts[i] < 0) {
+          res = 'Error: ' + first7 + ' ' + parts.join(' ') + ', all arguments must be positive or 0.';
+          break outer;
+        }
+      }
 
-    if(parts.length == 0) {
-      res = first7 + " needs an argument";
-    } else {
-
-      rawColor = func.apply(this, parts);
-      txtColor = process(rawColor);
-
-      if(!rawColor) {
-        res = first7 + " was invoked incorrectly.";
+      if(parts.length == 0) {
+        res = first7 + " needs an argument";
       } else {
 
-        hexColor = rawColor.substr ? rawColor : Convert[RHS + '2hex'].apply(this, rawColor);
+        rawColor = func.apply(this, parts);
+        txtColor = process(rawColor);
 
-        res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + 
-          '<span title=' + hexColor + ' class=box style=background-color:' + hexColor + '></span>' +
-          "<a onclick=append(this,'" + RHS + "')>" + txtColor + "</a>";
+        if(!rawColor) {
+          res = first7 + " was invoked incorrectly.";
+        } else {
+
+          hexColor = rawColor.substr ? rawColor : Convert[RHS + '2hex'].apply(this, rawColor);
+
+          res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + 
+            '<span title=' + hexColor + ' class=box style=background-color:' + hexColor + '></span>' +
+            "<a onclick=append(this,'" + RHS + "')>" + txtColor + "</a>";
+        }
       }
-    }
 
-  } else {
-    res = first7 + " not found";
-  }
+    } else {
+      res = first7 + " not found";
+    }
+  } while (false);
+
   Output.innerHTML = ('<div>' + res + '</div>' + Output.innerHTML).substr(0, 3000);
 
   localStorage['output'] = Output.innerHTML;
