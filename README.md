@@ -56,7 +56,7 @@ The answer we are given here is:
 
 There's two 'replacement' charaters that immediately get replaced with a contextual answer from the last query.
 
-**?** - If your first character is a "?" then you get the "RHS" value of the last query ... that is to say the format of the output.
+**?** - If your first character is a `?` then you get the RHS value of the last query ... that is to say the format of the output.  For instance, if the last command was `rgb2hex 50% 0.5 128` and you put in a `?` then the `?` will get replaced with `hex2`.
 
 **!** - If you put an exclamation point after your function name, such as `rgb2hsl !` then the `!` gets replaced with the output of the last command.
 
