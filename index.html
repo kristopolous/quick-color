@@ -379,10 +379,16 @@ function doit() {
       // convert it
       parts = Convert.hex2rgb(parts[0]);
     }
+
     // this means that our input should be integers
     if(func.length > 1) {
       for(var i = 0; i < parts.length; i++) {
-        parts[i] = parseFloat(parts[i]);
+        // or perhaps expressions.
+        if(parts[i].match(/[\-+\*\/]/)) {
+          parts[i] = eval(parts[i]);
+        } else {
+          parts[i] = parseFloat(parts[i]);
+        }
       }
     }
 
