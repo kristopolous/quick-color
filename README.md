@@ -75,7 +75,11 @@ Now I can click on the triplet number above and it will become part of the input
 
     > hsl2xxx 42.903 0.744 0.488
 
-With the xxx selected.  Let's put in rgb 
+With the xxx selected.
+<br>
+<img src=http://i.imgur.com/sh5Gzol.png>
+
+Let's put in the text "rgb"
 
     > hsl2rgb 42.903 0.744 0.488
 
@@ -88,6 +92,10 @@ As you can see from the little boxes, it looks like we are successful.  But how 
 
 Hover over the little box and you'll see the hex code to use for html.
 
+<img src=http://i.imgur.com/xoOeLzF.png><br>
+
 Click on it and you'll see the color appended to the input box and selected.  
+
+<img src=http://i.imgur.com/jOnkOgX.png><br>
 
 Now you can do a Ctrl+x (or equivalent cut) on your platform and get the color into the clipboard.
