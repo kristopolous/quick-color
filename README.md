@@ -19,8 +19,11 @@ Here, it's a single input box where you type commands like
 
 And bam, it's done.
 
-Here's what it looks like:
+Here's what it looks like:<br>
 <img src=http://i.imgur.com/PwYJ2ys.png>
+<br>
+
+<h3><a href="http://9ol.es/quick-color.html">Live version</a></h3>
 
 ## Syntax
 
