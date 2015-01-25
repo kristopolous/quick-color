@@ -5,12 +5,18 @@
   width: 12px;
   vertical-align: middle;
   margin-right: 0.2em;
-  height: 1em;
+  height: 0.8em;
 }
-a{ cursor: pointer; text-decoration: underline; color: blue}
-#input { width: 80% }
+a { 
+  cursor: pointer; 
+  text-decoration: underline; 
+  color: blue
+}
+#input { 
+  width: 80% 
+}
 div {
-  margin-top: 0.1em;
+  margin-top: 0.4em;
 }
 button { float: right }
 </style>
@@ -67,7 +73,9 @@ function process(what) {
       return what;
     } else {
       for(var i = 0; i < what.length; i++) {
-        what[i] = what[i].toFixed(3);
+        if(parseInt(what[i]) !== what[i]) {
+          what[i] = what[i].toFixed(3);
+        }
       }
       return what.join(' ');
     } 
@@ -84,7 +92,7 @@ function floatTo256(f) {
     }
     return r;
   }
-  return f * 256;
+  return Math.round(f * 256);
 }
 
 var Convert = {
@@ -222,18 +230,14 @@ var Convert = {
           break;
       }
     } 
-    rgb[0] *= 255;
-    rgb[1] *= 255;
-    rgb[2] *= 255;
-    return rgb;
+
+    return floatTo256(rgb);
   },
   rgb2hsl: function(r, g, b) {
     r = unit(r);
     g = unit(g);
     b = unit(b);
 
-    console.log(r, g, b);
-    return [r, g, b];
     var
       min = Math.min(r, g, b),
       max = Math.max(r, g, b),
