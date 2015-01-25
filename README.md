@@ -42,20 +42,19 @@ Where LHS and RHS is one of
 
 and arguments are either one of
 
- * a hex color in the form of #aabbcc
- * 3 numbers between 0 and 256
- * 3 floating point numbers between 0 and 1
+ * a hex color in the form of #aabbcc or the short syntax of #abc
+ * a numbers between 0 and 255 (or 0 to 360 when appropriate in hsl/hsv space).
+ * a floating point numbers between 0 and 1.
  * a percentage expressed like "90%"
  * an equation with no spaces, such as "0.5/2".
 
-If the LHS is col, such as "col2rgb", then the input can be an html color name ... the valid names are in the index.html file. Scroll down and a huge table should be obvious.
-
+> Note: If the LHS is "col", such as "col2rgb", then the input can be an html color name ... the valid names are in the index.html file. Scroll down and a huge table should be obvious.
 
 ## Examples
 
 ### Syntax
 
-We're going to take an input expressed in a mixed form of percentages, floating point numbers, and a value that is [0..256].
+We're going to take an input expressed in a mixed form of percentages, floating point numbers, and a value that is [0..255].
 
 Our test case will be the mid-point of each of these expressions.
 
