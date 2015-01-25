@@ -158,7 +158,7 @@ var Convert = {
     l = unit(l);
 
     if (s == 0) {
-      return [l, l, l];
+      return floatTo256([l, l, l]);
     }
      
     var temp2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
