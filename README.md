@@ -38,5 +38,37 @@ and arguments are either one of
  * a hex color in the form of #aabbcc
  * 3 numbers between 0 and 256
  * 3 floating point numbers between 0 and 1
+ * a percentage expressed like "90%"
+ * an equation with no spaces, such as "0.5/2".
+
+For instance:
+
+    rgb2hex 50% 0.5 128 
+
+would yield:
+
+    #808080
 
 And that's it.
+
+## Examples
+
+Let's say I have an html color, goldenrod, and I want to find a darker version of it.
+
+    > col2hsl goldenrod
+    42.903 0.744 0.488
+
+Now I can click on the triplet number above and it will become part of the input.  The type of the input is remembered, as you see, the input box now becomes:
+
+    > hsl2xxx 42.903 0.744 0.488
+
+With the xxx selected.  Let's put in rgb and then take the luminance (last number) and multiply it by 0.75
+
+    > hsl2rgb 42.903 0.744 0.488*0.75 
+    163 124 24
+
+As you can see from the little boxes, it looks like we are successful.
+
+Hover over the little box and you'll see the hex code to use for html.
+
+Click on it and you'll see the color appended to the input box and selected.  Now you can do a Ctrl+x (or equivalent cut) on your platform and get the color into the clipboard.

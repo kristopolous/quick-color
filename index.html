@@ -82,7 +82,7 @@ function ununit(what, max) {
   if(!max) {
     max = 256;
   }
-  if(what > 1) {
+  if(what >= 1) {
     return parseFloat(what, 10);
   }
   return what * max;
@@ -92,7 +92,7 @@ function unit(what, max) {
   if(!max) {
     max = 256;
   }
-  if(what > 1) {
+  if(what >= 1) {
     return what / max;
   }
   return parseFloat(what, 10);
@@ -102,6 +102,7 @@ function unit(what, max) {
 var hexDigits = ['0','1','2','3','4','5','6','7','8','9',"A","B","C","D","E","F"]
 function hex(x) {
   x = parseInt(x);
+  console.log(x, x - x % 16);
   return isNaN(x) ? "00" : hexDigits[(x - x % 16) / 16] + '' + hexDigits[x % 16];
 }
 
@@ -482,6 +483,8 @@ var Convert = {
 function pop(el) {
   el.style.color = 'purple';
   Input.value = el.innerHTML;
+  Input.setSelectionRange(el.innerHTML.length, Input.value.length);
+  Input.focus();
 }
 
 function append(el, type) {
@@ -491,13 +494,18 @@ function append(el, type) {
 
   if(lhs != type) {
     Input.value = type + "2xxx " + el.innerHTML;
-    Input.setSelectionRange(4,7);
-    Input.focus();
   } else if(val.length > 6) {
-    Input.value = 
-      val.substr(0,7) + ' ' + el.innerHTML;
-    doit();
+    Input.value = val.substr(0,7) + ' ' + el.innerHTML;
   }
+  Input.setSelectionRange(4,7);
+  Input.focus();
+}
+
+function show(el) {
+  var start = Input.value.length;
+  Input.value += el.title;
+  Input.setSelectionRange(start,el.title.length + start);
+  Input.focus();
 }
 
 function doit() {
@@ -533,6 +541,9 @@ outer:
           // or perhaps expressions.
           if(parts[i].match(/[\-+\*\/]/)) {
             parts[i] = eval(parts[i]);
+          } else if(parts[i].slice(-1) == '%'){
+            // supports percents
+            parts[i] = parseFloat(parts[i]) / 100;
           } else {
             parts[i] = parseFloat(parts[i]);
           }
@@ -559,7 +570,7 @@ outer:
           hexColor = rawColor.substr ? rawColor : Convert[RHS + '2hex'].apply(this, rawColor);
 
           res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + 
-            '<span title=' + hexColor + ' class=box style=background-color:' + hexColor + '></span>' +
+            '<span onclick=show(this) title=' + hexColor + ' class=box style=background-color:' + hexColor + '></span>' +
             "<a onclick=append(this,'" + RHS + "')>" + txtColor + "</a>";
         }
       }
