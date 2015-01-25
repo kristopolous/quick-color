@@ -52,6 +52,16 @@ The answer we are given here is:
 
     #808080
 
+#### Helpers
+
+There's two 'replacement' charaters that immediately get replaced with a contextual answer from the last query.
+
+**?** - If your first character is a "?" then you get the "RHS" value of the last query ... that is to say the format of the output.
+
+**!** - If you put an exclamation point after your function name, such as `rgb2hsl !` then the `!` gets replaced with the output of the last command.
+
+These shortcuts help quickly chain a process such as the one below.
+
 ### Complex
 
 Let's say I have an html color, goldenrod, and I want to find a darker version of it.
@@ -86,4 +96,8 @@ Click on it and you'll see the color appended to the input box and selected.
 
 <img src=http://i.imgur.com/jOnkOgX.png><br>
 
-Now you can do a Ctrl+x (or equivalent cut) on your platform and get the color into the clipboard.
+Now you can do a Ctrl+X (or equivalent cut) on your platform and get the color into the clipboard.
+
+
+
+
