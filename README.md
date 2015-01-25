@@ -4,22 +4,10 @@ They are covered in ads and inflexible in their input and output.
 
 Some of them even moronically post data off to a server and do a page refresh to show you the result.
 
-Like it's 1997 or something.
+We can do better.
 
-## This one doesn't.
+## Here's my attempt
 
-Here, it's a single input box where you type commands like
-
-
-    rgb2hsl #432123
-
-    hex2rgb #ab3s34
-
-    hsv2hex 34 53 12
-
-And bam, it's done.
-
-Here's what it looks like:<br>
 <img src=http://i.imgur.com/PwYJ2ys.png>
 <br>
 
