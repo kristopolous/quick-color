@@ -64,7 +64,7 @@ These shortcuts help quickly chain a process such as the one below.
 
 ### Complex
 
-Let's say I have an html color, goldenrod, and I want to find a darker version of it.
+Let's say I have an HTML color, goldenrod, and I want to find a darker version of it. I can easily do this in HSL space.
 
     > col2hsl goldenrod
     42.903 0.744 0.488
