@@ -286,19 +286,12 @@ function name2Hex(colour) {
 }
 
 var Convert = {
-  // from https://gist.github.com/jonathantneal/2121882
-  col2hex: function(col) {
-    return name2Hex(col);
-  },
-  col2rgb: function(col) {
-    return Convert.hex2rgb(Convert.col2hex(col));
-  },
-  col2hsl: function(col) {
-    return Convert.hex2hsl(Convert.col2hex(col));
-  },
-  col2hsv: function(col) {
-    return Convert.hex2hsv(Convert.col2hex(col));
-  },
+  // Wrappers
+  col2hex: function(col) { return name2Hex(col); },
+  col2rgb: function(col) { return Convert.hex2rgb(Convert.col2hex(col)); },
+  col2hsl: function(col) { return Convert.hex2hsl(Convert.col2hex(col)); },
+  col2hsv: function(col) { return Convert.hex2hsv(Convert.col2hex(col)); },
+
   hsv2hsl: function(h, s, v) {
     var rgb = Convert.hsv2rgb(h, s, v);
     return Convert.rgb2hsl.apply(this, rgb);
@@ -323,14 +316,18 @@ var Convert = {
     var rgb = Convert.hsl2rgb(h, s, l);
     return Convert.rgb2hsv.apply(this, rgb);
   },
-  // this makes the satisfiability of our box coloring logic
-  // much better.
-  hex2hex: function(hex) { 
-    return hex;
-  },
   rgb2hex: function(r, g, b) {
     return '#' + hex(ununit(r)) + hex(ununit(g)) + hex(ununit(b));
   },
+
+  // identity functions
+  hex2hex: function(hex) { return hex; },
+  hsl2hsl: function(hsl) { return hsl; },
+  hsv2hsv: function(hsl) { return hsv; },
+  rgb2rgb: function(hsl) { return rgb; },
+  col2col: function(col) { return col; },
+
+  // actual computations.
 
   // from http://www.javascripter.net/faq/rgb2hsv.htm
   rgb2hsv: function(r, g, b) {
