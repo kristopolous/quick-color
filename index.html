@@ -322,9 +322,9 @@ var Convert = {
 
   // identity functions
   hex2hex: function(hex) { return hex; },
-  hsl2hsl: function(hsl) { return hsl; },
-  hsv2hsv: function(hsl) { return hsv; },
-  rgb2rgb: function(hsl) { return rgb; },
+  hsl2hsl: function(h,s,l) { return [h,s,l]; },
+  hsv2hsv: function(h,s,v) { return [h,s,v]; },
+  rgb2rgb: function(r,g,b) { return [r,g,b]; },
   col2col: function(col) { return col; },
 
   // actual computations.

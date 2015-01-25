@@ -38,6 +38,8 @@ and arguments are either one of
 
 > Note: If the LHS is "col", such as "col2rgb", then the input can be an html color name ... the valid names are in the index.html file. Scroll down and a huge table should be obvious.
 
+> Note 2: Every LHS has an "identity" function which can be used for equations.  So for instance you can do `hsl2hsl 42.903 0.744 0.488*0.75`
+
 ## Examples
 
 ### Syntax
@@ -69,11 +71,7 @@ Let's say I have an HTML color, goldenrod, and I want to find a darker version o
     > col2hsl goldenrod
     42.903 0.744 0.488
 
-Now I can click on the triplet number above and it will become part of the input.  The type of the input is remembered, as you see, the input box now becomes:
-
-    > hsl2xxx 42.903 0.744 0.488
-
-With the xxx selected.
+Now I can click on the triplet number above and it will become part of the input.  The type of the input is remembered, as you see, the input box now has the type of function, the output of the last one, and a replacement string, xxx selected.
 <br>
 <img src=http://i.imgur.com/sh5Gzol.png>
 
