@@ -1,4 +1,5 @@
 <!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
 .box {
   display: inline-block;
@@ -30,8 +31,24 @@ a:hover {
   box-shadow: inset 0 0 5px 5px rgba(255,255,255,0.65);
   border-radius: 4px;
 }
+body {
+  margin: 0;
+  padding: 0;
+}
+form { 
+  display:block;
+  padding:0.25em 0.5em 0.1em;
+  background: rgba(95,95,95,0.7);
+}
 #input { 
-  width: 80% 
+  border: 0;
+  border-bottom: 2px dotted rgb(0,0,0);
+  color: #fff;
+  text-indent: 0.25em;
+  margin: 0.5em 0 0.5em;
+  font-size: 1.1em;
+  background: none;
+  width: 100%;
 }
 div {
   color: rgb(65,65,65);
@@ -39,9 +56,10 @@ div {
   margin-top: 0.2em;
   padding-top: 0.2em;
 }
-button { float: right }
+#output { margin: 1em }
 </style>
 <body onload=onload()>
+<title>Quick Color</title>
 <form action=javascript:doit()>
 <input id='input' name='input' list='funcnames'>
 <datalist id='funcnames'>
@@ -63,7 +81,6 @@ button { float: right }
   <option value="hsv2rgb h s v">
   <option value="hsv2hsl h s v">
 </datalist>
-<button>do it</button>
 </form>
 <pre id="output"></pre>
 </body>
@@ -72,10 +89,25 @@ button { float: right }
 var Input, Ouput;
 
 var 
+  to = {},
+  spaceList = [
+    'hsv', 'hsl', 'yuv', 'hex', 'rgb'
+  ],
   txtColor = localStorage['txtColor'],
   LHS, 
   RHS = localStorage['RHS'];
 
+for (var i = 0; i < spaceList.length; i++) {
+  (function(tmp){
+    // this is based on the previous
+    to[tmp] = function(what) {
+      var res = Convert[RHS + "2" + tmp](what);
+      // set the new type
+      RHS = tmp;
+      return res;
+    }
+  })(spaceList[i]);
+}
 
 function onload() {
   Output = document.getElementById('output');
@@ -118,7 +150,7 @@ function ununit(what, max) {
   if(what >= 1) {
     return parseFloat(what, 10);
   }
-  return what * max;
+  return (what * max) % max;
 }
 
 function unit(what, max) {
@@ -126,7 +158,7 @@ function unit(what, max) {
     max = 256;
   }
   if(what >= 1) {
-    return what / max;
+    return (what % max) / max;
   }
   return parseFloat(what, 10);
 }
@@ -138,7 +170,7 @@ function hex(x) {
   return isNaN(x) ? "00" : hexDigits[(x - x % 16) / 16] + '' + hexDigits[x % 16];
 }
 
-function process(what) {
+function process(what, type) {
   if(what) {
     if(what.substr) {
       return what;
@@ -148,7 +180,11 @@ function process(what) {
           what[i] = what[i].toFixed(3);
         }
       }
-      return what.join(' ');
+      if(type == 'rgb') {
+        return 'rgb(' + what.join(', ') + ')';
+      } else {
+        return what.join(' ');
+      }
     } 
   } else {
     return what;
@@ -354,9 +390,9 @@ var Convert = {
 
   // identity functions
   hex2hex: function(hex) { return hex; },
-  hsl2hsl: function(h,s,l) { return [h,s,l]; },
-  hsv2hsv: function(h,s,v) { return [h,s,v]; },
-  rgb2rgb: function(r,g,b) { return [r,g,b]; },
+  hsl2hsl: function(h,s,l) { return [h % 360, s, l]; },
+  hsv2hsv: function(h,s,v) { return [h, s, v]; },
+  rgb2rgb: function(r,g,b) { return [r, g, b]; },
   col2col: function(col) { return col; },
 
   // actual computations.
@@ -396,12 +432,12 @@ var Convert = {
       return floatTo256([l, l, l]);
     }
     var hue2rgb = function hue2rgb(p, q, t){
-        if(t < 0) t += 1;
-        if(t > 1) t -= 1;
-        if(t < 1/6) return p + (q - p) * 6 * t;
-        if(t < 1/2) return q;
-        if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-        return p;
+      if(t < 0) t += 1;
+      if(t > 1) t -= 1;
+      if(t < 1/6) return p + (q - p) * 6 * t;
+      if(t < 1/2) return q;
+      if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
     }
 
     var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
@@ -510,8 +546,9 @@ var Convert = {
 };
 
 function pop(el) {
+  var val = el.innerHTML;
   el.className = 'v';
-  Input.value = el.innerHTML;
+  Input.value = val;
   Input.setSelectionRange(el.innerHTML.length, Input.value.length);
   Input.focus();
 }
@@ -519,13 +556,18 @@ function pop(el) {
 function append(el, type) {
   el.className = 'v';
   var 
-    val = Input.value,
-    lhs = val.substr(0,3);
+    val = el.innerHTML,
+    input = Input.value,
+    lhs = input.substr(0,3);
+
+  if(val.match(/\(/)) {
+    val = val.slice(4, -1).split(',').join('')
+  }
 
   if(lhs != type) {
-    Input.value = type + "2" + type + " " + el.innerHTML;
+    Input.value = type + "2" + type + " " + val;
   } else if(val.length > 6) {
-    Input.value = val.substr(0,7) + ' ' + el.innerHTML;
+    Input.value = input.substr(0,7) + ' ' + val;
   }
   Input.setSelectionRange(4,7);
   Input.focus();
@@ -538,6 +580,15 @@ function show(el) {
   Input.focus();
 }
 
+function palette(color, verb) {
+  if(verb == 'triad') {
+    var format = RHS,
+      hsl = to.hsl(color),
+      colorList = [];
+    hsl[0] + 120
+  }
+}
+
 function doit() {
   var value = Input.value,
     res,
@@ -545,7 +596,7 @@ function doit() {
     hexColor,
     rawColor,
     func,
-    stepList = value.split('|'),
+    stepList = value.replace(/[\s,]+/g, ' ').split('|'),
     first7 = stepList[0].substr(0, 7),
     parts = stepList[0].substr(7).replace(/^\s+/, '').split(' ');
 
@@ -592,7 +643,7 @@ outer:
       } else {
 
         rawColor = func.apply(this, parts);
-        txtColor = process(rawColor);
+        txtColor = process(rawColor, RHS);
 
         if(!rawColor) {
           res = first7 + " was invoked incorrectly.";
