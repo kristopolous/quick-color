@@ -390,9 +390,9 @@ var Convert = {
 
   // identity functions
   hex2hex: function(hex) { return hex; },
-  hsl2hsl: function(h,s,l) { return [h % 360, s, l]; },
-  hsv2hsv: function(h,s,v) { return [h, s, v]; },
-  rgb2rgb: function(r,g,b) { return [r, g, b]; },
+  hsl2hsl: function(h, s, l) { return [h % 360, s, l]; },
+  hsv2hsv: function(h, s, v) { return [h, s, v]; },
+  rgb2rgb: function(r, g, b) { return [r, g, b]; },
   col2col: function(col) { return col; },
 
   // actual computations.
@@ -465,9 +465,9 @@ var Convert = {
     }
 
     return result ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16)
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16)
     ] : null;
   },
 
@@ -475,7 +475,7 @@ var Convert = {
   hsv2rgb: function (h, s, v) {
     var rgb, data, i;
     if (s === 0) {
-      rgb = [v,v,v];
+      rgb = [v, v, v];
     } else {
       h = h / 60;
       i = Math.floor(h);
@@ -580,12 +580,22 @@ function show(el) {
   Input.focus();
 }
 
-function palette(color, verb) {
+function render(color, type) {
+  var 
+    txtColor = process(color, type),
+    hexColor = Convert[type + '2hex'].apply(this, color);
+
+  return '<span onclick=show(this) title=' + hexColor + ' class=box style=background-color:' + hexColor + "></span><a onclick=append(this,'" + type + "')>" + txtColor + "</a>";
+}
+
+function pipe(color, verb) {
   if(verb == 'triad') {
     var format = RHS,
       hsl = to.hsl(color),
-      colorList = [];
-    hsl[0] + 120
+      colorList = [hsl, hsl, hsl];
+
+    colorList[1][0] += 120;
+    colorList[2][0] += 240;
   }
 }
 
@@ -643,17 +653,19 @@ outer:
       } else {
 
         rawColor = func.apply(this, parts);
-        txtColor = process(rawColor, RHS);
-
         if(!rawColor) {
           res = first7 + " was invoked incorrectly.";
+
         } else {
+          // take the first caller off.
+          stepList.shift();
 
-          hexColor = rawColor.substr ? rawColor : Convert[RHS + '2hex'].apply(this, rawColor);
+          while(stepList.length > 0) {
+            var verb = stepList.shift();
+            rawColor = pipe(rawColor, verb);
+          }
 
-          res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + 
-            '<span onclick=show(this) title=' + hexColor + ' class=box style=background-color:' + hexColor + '></span>' +
-            "<a onclick=append(this,'" + RHS + "')>" + txtColor + "</a>";
+          res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + render(rawColor, RHS);
         }
       }
 
