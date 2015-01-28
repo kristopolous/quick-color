@@ -9,6 +9,22 @@
   height: 1em;
   margin-right: 0.5em;
 }
+
+.multple .box {
+  border-radius: 1px;
+}
+
+.multiple {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.multiple li {
+  margin: 0.15em 0;
+  list-style: none;
+}
 a.v {
   color: rgb(160,40,90);
 }
@@ -28,8 +44,6 @@ a:hover {
   text-decoration: none;
   color: #222;
   padding: 0.15em 0.3em;
-  box-shadow: inset 0 0 5px 5px rgba(255,255,255,0.65);
-  border-radius: 4px;
 }
 body {
   margin: 0;
@@ -147,7 +161,7 @@ function ununit(what, max) {
   if(!max) {
     max = 256;
   }
-  if(what >= 1) {
+  if(what > 1) {
     return parseFloat(what, 10);
   }
   return (what * max) % max;
@@ -157,7 +171,7 @@ function unit(what, max) {
   if(!max) {
     max = 256;
   }
-  if(what >= 1) {
+  if(what > 1) {
     return (what % max) / max;
   }
   return parseFloat(what, 10);
@@ -170,25 +184,27 @@ function hex(x) {
   return isNaN(x) ? "00" : hexDigits[(x - x % 16) / 16] + '' + hexDigits[x % 16];
 }
 
-function process(what, type) {
-  if(what) {
-    if(what.substr) {
-      return what;
-    } else {
-      for(var i = 0; i < what.length; i++) {
-        if(parseInt(what[i]) !== what[i]) {
-          what[i] = what[i].toFixed(3);
-        }
-      }
-      if(type == 'rgb') {
-        return 'rgb(' + what.join(', ') + ')';
-      } else {
-        return what.join(' ');
-      }
-    } 
-  } else {
-    return what;
+function process(color) {
+  var 
+    type = color.type,
+    value = color.value;
+
+  if(type == 'hex') {
+    return value;
   }
+
+  for(var i = 0; i < value.length; i++) {
+    console.log(value, i);
+    if(parseInt(value[i]) !== value[i]) {
+      value[i] = value[i].toFixed(3);
+    }
+  }
+
+  if(type == 'rgb') {
+    return 'rgb(' + value.join(', ') + ')';
+  } 
+
+  return value.join(' ');
 }
 
 function floatTo256(f) {
@@ -360,50 +376,49 @@ var Convert = {
   col2hsl: function(col) { return Convert.hex2hsl(Convert.col2hex(col)); },
   col2hsv: function(col) { return Convert.hex2hsv(Convert.col2hex(col)); },
 
-  hsv2hsl: function(h, s, v) {
-    var rgb = Convert.hsv2rgb(h, s, v);
-    return Convert.rgb2hsl.apply(this, rgb);
+  hsv2hsl: function(hsv) {
+    var rgb = Convert.hsv2rgb(hsv);
+    return Convert.rgb2hsl(rgb);
   },
   hex2hsv: function(hex) {
     var rgb = Convert.hex2rgb(hex);
-    return Convert.rgb2hsv.apply(this, rgb);
+    return Convert.rgb2hsv(rgb);
   },
   hex2hsl: function(hex) {
     var rgb = Convert.hex2rgb(hex);
-    return Convert.rgb2hsl.apply(this, rgb);
+    return Convert.rgb2hsl(rgb);
   },
-  hsv2hex: function(h, s, v) {
-    var rgb = Convert.hsv2rgb(h, s, v);
-    return Convert.rgb2hex.apply(this, rgb);
+  hsv2hex: function(hsv) {
+    var rgb = Convert.hsv2rgb(hsv);
+    return Convert.rgb2hex(rgb);
   },
-  hsl2hex: function(h, s, l) {
-    var rgb = Convert.hsl2rgb(h, s, l);
-    return Convert.rgb2hex.apply(this, rgb);
+  hsl2hex: function(hsl) {
+    var rgb = Convert.hsl2rgb(hsl);
+    return Convert.rgb2hex(rgb);
   },
-  hsl2hsv: function(h, s, l) {
-    var rgb = Convert.hsl2rgb(h, s, l);
-    return Convert.rgb2hsv.apply(this, rgb);
+  hsl2hsv: function(hsl) {
+    var rgb = Convert.hsl2rgb(hsl);
+    return Convert.rgb2hsv(rgb);
   },
-  rgb2hex: function(r, g, b) {
-    return '#' + hex(ununit(r)) + hex(ununit(g)) + hex(ununit(b));
+  rgb2hex: function(rgb) {
+    return '#' + hex(ununit(rgb[0])) + hex(ununit(rgb[1])) + hex(ununit(rgb[2]));
   },
 
   // identity functions
   hex2hex: function(hex) { return hex; },
-  hsl2hsl: function(h, s, l) { return [h % 360, s, l]; },
-  hsv2hsv: function(h, s, v) { return [h, s, v]; },
-  rgb2rgb: function(r, g, b) { return [r, g, b]; },
+  hsl2hsl: function(hsl) { return [hsl[0] % 360, parseFloat(hsl[1], 10), parseFloat(hsl[2], 10)]; },
+  hsv2hsv: function(hsv) { return hsv; },
+  rgb2rgb: function(rgb) { return rgb; },
   col2col: function(col) { return col; },
 
   // actual computations.
 
   // from http://www.javascripter.net/faq/rgb2hsv.htm
-  rgb2hsv: function(r, g, b) {
-    var h, s, v;
-    
-    r = unit(r);
-    g = unit(g);
-    b = unit(b);
+  rgb2hsv: function(rgb) {
+    var h, s, v,
+      r = unit(rgb[0]),
+      g = unit(rgb[1]),
+      b = unit(rgb[2]);
 
     var minRGB = Math.min(r, Math.min(g, b));
     var maxRGB = Math.max(r, Math.max(g, b));
@@ -424,10 +439,12 @@ var Convert = {
   },
   
   // from http://stackoverflow.com/a/9493060/535759
-  hsl2rgb: function(h, s, l) {
-    h = unit(h, 360);
-    s = unit(s);
-    l = unit(l);
+  hsl2rgb: function(hsl) {
+    var
+      h = unit(hsl[0], 360),
+      s = parseFloat(hsl[1], 10);
+      l = parseFloat(hsl[2], 10);
+
     if (s == 0) {
       return floatTo256([l, l, l]);
     }
@@ -472,8 +489,13 @@ var Convert = {
   },
 
   // from https://gist.github.com/schinckel/1588489
-  hsv2rgb: function (h, s, v) {
-    var rgb, data, i;
+  hsv2rgb: function (hsv) {
+    var 
+      rgb, data, i,
+      h = hsv[0],
+      s = hsv[1],
+      v = hsv[2];
+
     if (s === 0) {
       rgb = [v, v, v];
     } else {
@@ -504,10 +526,12 @@ var Convert = {
 
     return floatTo256(rgb);
   },
-  rgb2hsl: function(r, g, b) {
-    r = unit(r);
-    g = unit(g);
-    b = unit(b);
+
+  rgb2hsl: function(rgb) {
+    var 
+      r = unit(rgb[0]),
+      g = unit(rgb[1]),
+      b = unit(rgb[2]);
 
     // this part from https://gist.github.com/jonathantneal/2121882
     var
@@ -536,7 +560,6 @@ var Convert = {
           break;
         }
       h /= 6;
-      //h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60;
     }
      
     // [0 - 360, 0 - 1, 0 - 1]
@@ -580,23 +603,83 @@ function show(el) {
   Input.focus();
 }
 
-function render(color, type) {
-  var 
-    txtColor = process(color, type),
-    hexColor = Convert[type + '2hex'].apply(this, color);
+function render(color) {
+  if(color.type == 'multiple') {
+    var list = color.value, res = [];
+    for(var i = 0; i < list.length; i++) {
+      res.push( render(list[i]));
+    }
+    return '<ul class=multiple><li>' + res.join('</li><li>') + '</li></ul>';
 
-  return '<span onclick=show(this) title=' + hexColor + ' class=box style=background-color:' + hexColor + "></span><a onclick=append(this,'" + type + "')>" + txtColor + "</a>";
+  } else {
+    var 
+      txtColor = process(color),
+      hexColor = Convert[color.type + '2hex'](color.value);
+
+    return '<span onclick=show(this) title=' + hexColor + ' class=box style=background-color:' + hexColor + "></span><a onclick=append(this,'" + color.type + "')>" + txtColor + "</a>";
+  }
+}
+
+function copy(what) {
+  var res = [];
+  for(var i = 0; i < what.length; i++) {
+    res.push(what[i]);
+  } 
+  return res;
 }
 
 function pipe(color, verb) {
-  if(verb == 'triad') {
-    var format = RHS,
-      hsl = to.hsl(color),
-      colorList = [hsl, hsl, hsl];
+  var 
+    type = color.type,
+    hsl = Convert[type + '2hsl'](color.value),
+    conv = Convert['hsl2' + type],
+    len,
+    val,
+    colorList = [copy(hsl), copy(hsl), copy(hsl), copy(hsl)];
 
-    colorList[1][0] += 120;
-    colorList[2][0] += 240;
+  switch(verb) {
+    case 'split':
+      colorList[1][0] += (180 + 30);
+      colorList[2][0] += (180 - 30);
+      len = 3;
+      break;
+
+    case 'ana':
+      colorList[1][0] -= (30 * 1);
+      colorList[2][0] += (30 * 1);
+      len = 3;
+      break;
+
+    case 'comp':
+      colorList[1][0] += (180 * 1);
+      len = 2;
+      break;
+
+    case 'triad':
+      colorList[1][0] += (120 * 1);
+      colorList[2][0] += (120 * 2);
+      len = 3;
+      break;
+
+    case 'rect':
+      colorList[1][0] += (90 * 1);
+      colorList[2][0] += (90 * 2);
+      colorList[3][0] += (90 * 3);
+      len = 4;
+      break;
   }
+
+  val = [
+    { type: type, value: conv(colorList[0]) },
+    { type: type, value: conv(colorList[1]) },
+    { type: type, value: conv(colorList[2]) },
+    { type: type, value: conv(colorList[3]) }
+  ];
+
+  return {
+    type: 'multiple',
+    value: val.slice(0, len)
+  };
 }
 
 function doit() {
@@ -608,7 +691,10 @@ function doit() {
     func,
     stepList = value.replace(/[\s,]+/g, ' ').split('|'),
     first7 = stepList[0].substr(0, 7),
-    parts = stepList[0].substr(7).replace(/^\s+/, '').split(' ');
+    parts = stepList[0].substr(7)
+      .replace(/\s+$/,'')
+      .replace(/^\s+/, '')
+      .split(' ');
 
 outer:
   do {
@@ -621,6 +707,7 @@ outer:
       if(parts[0] == '') {
         parts.shift();
       }
+
       // if the input is a hex code and that's not what we are looking for
       if(parts.length == 1 && func.length > 1) {
         // convert it
@@ -628,17 +715,15 @@ outer:
       }
 
       // this means that our input should be integers
-      if(func.length > 1) {
-        for(var i = 0; i < parts.length; i++) {
-          // or perhaps expressions.
-          if(parts[i].match(/[\-+\*\/]/)) {
-            parts[i] = eval(parts[i]);
-          } else if(parts[i].slice(-1) == '%'){
-            // supports percents
-            parts[i] = parseFloat(parts[i]) / 100;
-          } else {
-            parts[i] = parseFloat(parts[i]);
-          }
+      for(var i = 0; i < parts.length; i++) {
+        // or perhaps expressions.
+        if(parts[i].slice(-1) == '%'){
+          // supports percents
+          parts[i] = parseFloat(parts[i]) / 100;
+        } else if(parts[i].match(/[%\-+\*\/]/)) {
+          parts[i] = eval(parts[i]);
+        } else {
+          parts[i] = parseFloat(parts[i]);
         }
       }
       for(var i = 0; i < parts.length; i++) {
@@ -652,8 +737,16 @@ outer:
         res = first7 + " needs an argument";
       } else {
 
-        rawColor = func.apply(this, parts);
-        if(!rawColor) {
+        if(parts.length == 1) {
+          parts = parts[0];
+        }
+
+        rawColor = {
+          type: RHS,
+          value: func(parts)
+        };
+
+        if(!rawColor.value) {
           res = first7 + " was invoked incorrectly.";
 
         } else {
@@ -661,11 +754,11 @@ outer:
           stepList.shift();
 
           while(stepList.length > 0) {
-            var verb = stepList.shift();
+            var verb = stepList.shift().replace(/\s/g,'');
             rawColor = pipe(rawColor, verb);
           }
 
-          res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + render(rawColor, RHS);
+          res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + render(rawColor);
         }
       }
 
