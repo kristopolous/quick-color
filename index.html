@@ -104,6 +104,9 @@ var Input, Ouput;
 
 var 
   to = {},
+  pipeList = [
+    'split', 'ana', 'comp', 'square', 'rect', 'triad'
+  ],
   spaceList = [
     'hsv', 'hsl', 'yuv', 'hex', 'rgb'
   ],
@@ -130,16 +133,32 @@ function onload() {
   if(localStorage['output']) {
     Output.innerHTML = localStorage['output'];
   }
-  var colorHint = false, colorDom = '', hint = document.getElementById('funcnames').innerHTML;
+  var 
+    colorHint = false, 
+    pipeHint = false,
+    colorDom = '', 
+    hint = document.getElementById('funcnames').innerHTML;
 
   // if the input is a ! then we replace it with the color value of the last
   Input.addEventListener('keyup', function() {
     var repl = '';
+
     switch(this.value.slice(-1)) {
       case '!': repl = txtColor; break;
       case '?': repl = RHS + '2'; break;
     }
-    if(this.value.slice(0,3) == 'col' && this.value.length > 8) {
+
+    // if we are piped.
+    if (this.value.search(/\|/) > -1) {
+      if(pipeHint == false) {
+        var fName = this.value.split('|')[0] + '| ';
+        document.getElementById('funcnames').innerHTML = '<option value="' + fName + 
+          pipeList.join('"><option value="' + fName) 
+        + '">';
+        pipeHint = true;
+      }
+    } else if(this.value.slice(0, 3) == 'col' && this.value.length > 8) {
+    // if we are dealing with a color...
       if(colorHint == false) {
         var fName = this.value.slice(0,8);
         document.getElementById('funcnames').innerHTML = '<option value="' + fName + 
@@ -150,11 +169,18 @@ function onload() {
     } else if (colorHint == true) {
       document.getElementById('funcnames').innerHTML = hint;
       colorHint = false;
+    } else if (pipeHint == true) {
+      document.getElementById('funcnames').innerHTML = hint;
+      pipeHint = false;
     }
+
     if(repl) {
       this.value = this.value.slice(0, -1) + repl;
     }
   });
+
+  Input.setSelectionRange(Input.value.length, Input.value.length);
+  Input.focus();
 }
 
 function ununit(what, max) {
@@ -363,10 +389,11 @@ var htmlcolors = {
 };
 
 function name2Hex(colour) {
-    if (typeof htmlcolors[colour.toLowerCase()] != 'undefined')
-        return htmlcolors[colour.toLowerCase()];
+  if (typeof htmlcolors[colour.toLowerCase()] != 'undefined') {
+    return htmlcolors[colour.toLowerCase()];
+  }
 
-    return "#000000";
+  return "#000000";
 }
 
 var Convert = {
@@ -457,13 +484,15 @@ var Convert = {
       return p;
     }
 
-    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    var p = 2 * l - q;
+    var 
+      q = l < 0.5 ? l * (1 + s) : l + s - l * s,
+      p = 2 * l - q;
+
     r = hue2rgb(p, q, h + 1/3);
     g = hue2rgb(p, q, h);
     b = hue2rgb(p, q, h - 1/3);
 
-    return floatTo256([r,g,b]);
+    return floatTo256([r, g, b]);
   },
 
   // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
@@ -501,23 +530,34 @@ var Convert = {
     } else {
       h = h / 60;
       i = Math.floor(h);
-      data = [v*(1-s), v*(1-s*(h-i)), v*(1-s*(1-(h-i)))];
+
+      data = [ 
+        v * (1 - s), 
+        v * (1 - s * (h - i)), 
+        v * (1 - s * (1 - (h - i)))
+      ];
+
       switch(i) {
         case 0:
           rgb = [v, data[2], data[0]];
           break;
+
         case 1:
           rgb = [data[1], v, data[0]];
           break;
+
         case 2:
           rgb = [data[0], v, data[2]];
           break;
+
         case 3:
           rgb = [data[0], data[1], v];
           break;
+
         case 4:
           rgb = [data[2], data[0], v];
           break;
+
         default:
           rgb = [v, data[0], data[1]];
           break;
@@ -558,7 +598,7 @@ var Convert = {
         case b:
           h = (r - g) / diff + 4;
           break;
-        }
+      }
       h /= 6;
     }
      
@@ -661,10 +701,17 @@ function pipe(color, verb) {
       len = 3;
       break;
 
-    case 'rect':
+    case 'square':
       colorList[1][0] += (90 * 1);
       colorList[2][0] += (90 * 2);
       colorList[3][0] += (90 * 3);
+      len = 4;
+      break;
+
+    case 'rect':
+      colorList[1][0] += 30;
+      colorList[2][0] += 180;
+      colorList[3][0] += 210;
       len = 4;
       break;
   }
@@ -689,85 +736,90 @@ function doit() {
     hexColor,
     rawColor,
     func,
+    funcParts,
     stepList = value.replace(/[\s,]+/g, ' ').split('|'),
-    first7 = stepList[0].substr(0, 7),
-    parts = stepList[0].substr(7)
+    parts = stepList[0]
       .replace(/\s+$/,'')
       .replace(/^\s+/, '')
-      .split(' ');
+      .split(' '),
+    funcName = parts.shift();
 
 outer:
   do {
-    if(Convert[first7]) {
-      func = Convert[first7]; 
-
-      LHS = first7.substr(0, 3);
-      RHS = first7.substr(4);
-
-      if(parts[0] == '') {
-        parts.shift();
-      }
-
-      // if the input is a hex code and that's not what we are looking for
-      if(parts.length == 1 && func.length > 1) {
-        // convert it
-        parts = Convert.hex2rgb(parts[0]);
-      }
-
-      // this means that our input should be integers
-      for(var i = 0; i < parts.length; i++) {
-        // or perhaps expressions.
-        if(parts[i].slice(-1) == '%'){
-          // supports percents
-          parts[i] = parseFloat(parts[i]) / 100;
-        } else if(parts[i].match(/[%\-+\*\/]/)) {
-          parts[i] = eval(parts[i]);
-        } else {
-          parts[i] = parseFloat(parts[i]);
-        }
-      }
-      for(var i = 0; i < parts.length; i++) {
-        if (parts[i] < 0) {
-          res = 'Error: ' + first7 + ' ' + parts.join(' ') + ', all arguments must be positive or 0.';
-          break outer;
-        }
-      }
-
-      if(parts.length == 0) {
-        res = first7 + " needs an argument";
-      } else {
-
-        if(parts.length == 1) {
-          parts = parts[0];
-        }
-
-        rawColor = {
-          type: RHS,
-          value: func(parts)
-        };
-
-        if(!rawColor.value) {
-          res = first7 + " was invoked incorrectly.";
-
-        } else {
-          // take the first caller off.
-          stepList.shift();
-
-          while(stepList.length > 0) {
-            var verb = stepList.shift().replace(/\s/g,'');
-            rawColor = pipe(rawColor, verb);
-          }
-
-          res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + render(rawColor);
-        }
-      }
-
-    } else {
-      res = first7 + " not found";
+    func = Convert[funcName]; 
+    
+    if(!func) {
+      res = funcName + " not found";
+      break outer;
     }
+
+    // it's xxx2yyy
+    funcParts = funcName.split('2');
+    LHS = funcParts[0];
+    RHS = funcParts[1];
+
+    if(parts[0] == '') {
+      parts.shift();
+    }
+
+    // if the input is a hex code and that's not what we are looking for
+    if(parts.length == 1 && func.length > 1) {
+      // convert it
+      parts = Convert.hex2rgb(parts[0]);
+    }
+
+    // this means that our input should be integers
+    for(var i = 0; i < parts.length; i++) {
+      // or perhaps expressions.
+      if(parts[i].slice(-1) == '%'){
+        // supports percents
+        parts[i] = parseFloat(parts[i]) / 100;
+      } else if(parts[i].match(/[%\-+\*\/]/)) {
+        parts[i] = eval(parts[i]);
+      } else if(!parts[i].match(/[^\d]/)) {
+        parts[i] = parseFloat(parts[i], 10);
+      }
+    }
+
+    for(var i = 0; i < parts.length; i++) {
+      if (parts[i] < 0) {
+        res = 'Error: ' + funcName + ' ' + parts.join(' ') + ', all arguments must be positive or 0.';
+        break outer;
+      }
+    }
+
+    if(parts.length == 0) {
+      res = funcName + " needs an argument";
+    } else {
+
+      if(parts.length == 1) {
+        parts = parts[0];
+      }
+
+      rawColor = {
+        type: RHS,
+        value: func(parts)
+      };
+
+      if(!rawColor.value) {
+        res = funcName + " was invoked incorrectly.";
+
+      } else {
+        // take the first caller off.
+        stepList.shift();
+
+        while(stepList.length > 0) {
+          var verb = stepList.shift().replace(/\s/g,'');
+          rawColor = pipe(rawColor, verb);
+        }
+
+        res = "<a onclick=pop(this)>" + value + "</a> &#9654; " + render(rawColor);
+      }
+    }
+
   } while (false);
 
-  Output.innerHTML = ('<div>' + res + '</div>' + Output.innerHTML).substr(0, 3000);
+  Output.innerHTML = ('<div>' + res + '</div>' + Output.innerHTML).substr(0, 25000);
 
   localStorage['output'] = Output.innerHTML;
   localStorage['RHS'] = RHS;

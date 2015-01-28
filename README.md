@@ -8,7 +8,7 @@ We can do better.
 
 ## A clean open-source hacker-friendly color converter.
 
-<img src=http://i.imgur.com/PwYJ2ys.png>
+<img src=http://i.imgur.com/BANCwWl.png>
 <br>
 
 <h3> Click <a href="http://9ol.es/quick-color.html">Here for a Live version</a>!</h3>
@@ -39,6 +39,27 @@ and arguments are either one of
 > Note: If the LHS is "col", such as "col2rgb", then the input can be an html color name ... the valid names will be shown in the drop-down helper after the command is entered. Try typing `col2rgb p` to see it in action.
 
 > Note 2: Every LHS has an "identity" function which can be used for equations.  So for instance you can do `hsl2hsl 42.903 0.744 0.488*0.75`
+
+### Pipes
+
+Like the unix shell, the output of the functions above can be taken as the input into a number of tools that will show harmonic color palettes.  The reference list for this is available at http://www.tigercolor.com/color-lab/color-theory/color-harmonies.htm
+
+The following commands are currently supported:
+
+  * comp - complementary
+  * ana - analagous
+  * triad - triad
+  * split - split-complementary
+  * rect - tetradic
+  * square - square
+
+The pipe maintains the RHS type information of the previous command.  So that means that a command like
+
+    > col2hex pink | triad
+
+Will convert pink to the HTML hex code equivalent and then do a stacked triad version of it.
+
+<img src=http://i.imgur.com/HD4WY6f.png>
 
 ## Examples
 
