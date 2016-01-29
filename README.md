@@ -11,7 +11,7 @@ We can do better.
 <img src=http://i.imgur.com/BANCwWl.png>
 <br>
 
-<h3> Click <a href="http://9ol.es/quick-color.html">Here for a Live version</a>!</h3>
+<h3> Click <a href="http://9ol.es/quick-color/">Here for a Live version</a>!</h3>
 
 ## Syntax
 
