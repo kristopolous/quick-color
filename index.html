@@ -407,6 +407,9 @@ function name2Hex(colour) {
 }
 
 var Convert = {
+  limits: {
+    hsv: [[0,360.0], [0,1], [0,1]],
+  },
   // Wrappers
   col2hex: function(col) { return name2Hex(col); },
   col2rgb: function(col) { return Convert.hex2rgb(Convert.col2hex(col)); },
@@ -791,8 +794,12 @@ outer:
       }
     }
 
+    var bounds = Convert.limits[LHS];
+
     for(var i = 0; i < parts.length; i++) {
-      if (parts[i] < 0) {
+      if(bounds) {
+        parts[i] = Math.min(Math.max(parts[i], bounds[i][0]), bounds[i][1]);
+      } else if (parts[i] < 0) {
         res = 'Error: ' + funcName + ' ' + parts.join(' ') + ', all arguments must be positive or 0.';
         break outer;
       }
