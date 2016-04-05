@@ -1,4 +1,4 @@
-## A clean open-source hacker-friendly color converter.
+**quick-color** strives to be a clean open-source hacker-friendly color manipulator and converter.  It seeks for maximum utility and functionality with minimum interface and overhead; a desk-calculator for colors.
 
 <h3> Click <a href="http://9ol.es/quick-color/">Here for a Live version</a>!</h3>
 
