@@ -759,7 +759,7 @@ function doit() {
 
 outer:
   do {
-    func = Convert[funcName]; 
+    func = Convert[funcName.toLowerCase()]; 
     
     if(!func) {
       res = funcName + " not found";
