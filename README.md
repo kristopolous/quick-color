@@ -1,17 +1,9 @@
-## All online color converters suck
-
-They are covered in ads and inflexible in their input and output.  
-
-Some of them even moronically post data off to a server and do a page refresh to show you the result.
-
-We can do better.
-
 ## A clean open-source hacker-friendly color converter.
+
+<h3> Click <a href="http://9ol.es/quick-color/">Here for a Live version</a>!</h3>
 
 <img src=http://i.imgur.com/BANCwWl.png>
 <br>
-
-<h3> Click <a href="http://9ol.es/quick-color/">Here for a Live version</a>!</h3>
 
 ## Syntax
 
