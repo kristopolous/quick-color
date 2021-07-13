@@ -37,7 +37,7 @@ a {
   color: rgb(40,40,90);
 }
 a:hover {
-  color: rgb(127,127,199);
+  text-decoration: underline;
 }
 .box a {
   background: rgba(255,255,255,0.8);
@@ -81,7 +81,7 @@ div {
   background: rgba(220,220,220,0.5);
 }
 </style>
-<body onload=onload()>
+<body>
 <title>Quick Color</title>
 <form action=javascript:doit()>
 <input id='input' name='input' list='funcnames'>
@@ -110,7 +110,7 @@ div {
 </body>
 <script>
 
-var Input, Ouput, 
+var Input, Output, 
   NOP = 'nop',
   LSpfix = 'QC:WGsBryeEQBI8u:',
   to = {},
@@ -140,13 +140,16 @@ function onload() {
   Output = document.getElementById('output');
   Input = document.getElementById('input');
 
-  if(localStorage[LSpfix + 'bg']) {
-    Convert.bg(localStorage[LSpfix + 'bg']);
-  }
+  ['bg','fg'].forEach(what => {
+    if(localStorage[LSpfix + what]) {
+      Convert[what](localStorage[LSpfix + what]);
+    }
+  });
 
   if(localStorage[LSpfix + 'output']) {
     Output.innerHTML = localStorage[LSpfix + 'output'];
   }
+
   var 
     colorHint = false, 
     pipeHint = false,
@@ -415,6 +418,13 @@ var Convert = {
   bg: (kol) => {
     localStorage[LSpfix + 'bg'] = kol;
     document.body.style.background = kol;
+    return NOP;
+  },
+  fg: (col) => {
+    localStorage[LSpfix + 'fg'] = col;
+    let style = document.createElement('style');
+    style.innerHTML = 'a,body,* { color:' + col + ' }';
+    document.body.appendChild(style);
     return NOP;
   },
   limits: {
@@ -857,4 +867,5 @@ outer:
   localStorage[LSpfix + 'RHS'] = RHS;
   localStorage[LSpfix + 'txtColor'] = txtColor;
 }
+document.addEventListener('DOMContentLoaded', onload, false);
 </script>
