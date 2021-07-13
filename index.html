@@ -110,9 +110,9 @@ div {
 </body>
 <script>
 
-var Input, Ouput;
-
-var 
+var Input, Ouput, 
+  NOP = 'nop',
+  LSpfix = 'QC:WGsBryeEQBI8u:',
   to = {},
   pipeList = [
     'split', 'ana', 'comp', 'square', 'rect', 'triad'
@@ -120,9 +120,9 @@ var
   spaceList = [
     'hsv', 'hsl', 'yuv', 'hex', 'rgb'
   ],
-  txtColor = localStorage['txtColor'],
+  txtColor = localStorage[LSpfix + 'txtColor'],
   LHS, 
-  RHS = localStorage['RHS'];
+  RHS = localStorage[LSpfix + 'RHS'];
 
 for (var i = 0; i < spaceList.length; i++) {
   (function(tmp){
@@ -140,8 +140,12 @@ function onload() {
   Output = document.getElementById('output');
   Input = document.getElementById('input');
 
-  if(localStorage['output']) {
-    Output.innerHTML = localStorage['output'];
+  if(localStorage[LSpfix + 'bg']) {
+    Convert.bg(localStorage[LSpfix + 'bg']);
+  }
+
+  if(localStorage[LSpfix + 'output']) {
+    Output.innerHTML = localStorage[LSpfix + 'output'];
   }
   var 
     colorHint = false, 
@@ -406,10 +410,17 @@ function name2Hex(colour) {
   return "#000000";
 }
 
+
 var Convert = {
+  bg: (kol) => {
+    localStorage[LSpfix + 'bg'] = kol;
+    document.body.style.background = kol;
+    return NOP;
+  },
   limits: {
     hsv: [[0,360.0], [0,1], [0,1]],
   },
+
   // Wrappers
   col2hex: function(col) { return name2Hex(col); },
   col2rgb: function(col) { return Convert.hex2rgb(Convert.col2hex(col)); },
@@ -818,6 +829,10 @@ outer:
         value: func(parts)
       };
 
+      if(rawColor.value == NOP) {
+        Input.value = '';
+        return;
+      }
       if(!rawColor.value) {
         res = funcName + " was invoked incorrectly.";
 
@@ -838,8 +853,8 @@ outer:
 
   Output.innerHTML = ('<div>' + res + '</div>' + Output.innerHTML).substr(0, 25000);
 
-  localStorage['output'] = Output.innerHTML;
-  localStorage['RHS'] = RHS;
-  localStorage['txtColor'] = txtColor;
+  localStorage[LSpfix + 'output'] = Output.innerHTML;
+  localStorage[LSpfix + 'RHS'] = RHS;
+  localStorage[LSpfix + 'txtColor'] = txtColor;
 }
 </script>
